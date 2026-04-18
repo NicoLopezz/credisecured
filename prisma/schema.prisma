@@ -1,0 +1,226 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Empresa {
+  id                  Int       @id @default(autoincrement())
+  cuit                String    @unique
+  comprobante         String?
+  razonSocial         String
+  nombreWhatsapp      String?
+  actividadPrimaria   String?
+  actividadSecundaria String?
+  otrasActividades    String?
+  rubro               String?
+  observaciones       String?
+  comentarios         String?
+  vigencia            String?
+  estado              String?
+  esCliente           Boolean   @default(false)
+  esProveedor         Boolean   @default(false)
+  costoA              Decimal?  @db.Decimal(20, 2)
+  costoB              Decimal?  @db.Decimal(20, 2)
+  costoC              Decimal?  @db.Decimal(20, 2)
+  percepciones        Int?
+  retenciones         Int?
+  costoAdicional      Decimal?  @db.Decimal(20, 2)
+  url                 String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  contactos           Contacto[]
+  cuposProveedor      CupoProveedor[]
+  pedidosCliente      PedidoCliente[]
+  operacionesCliente  Operacion[]      @relation("OperacionCliente")
+  operacionesProveedor Operacion[]     @relation("OperacionProveedor")
+  matrizCliente       MatrizCupo[]     @relation("MatrizCliente")
+  matrizProveedor     MatrizCupo[]     @relation("MatrizProveedor")
+  estadosMensuales    EstadoMensual[]
+  documentos          Documento[]
+  notas               Nota[]
+  datosBancarios      DatoBancario[]
+  etiquetas           EtiquetaEmpresa[]
+}
+
+model Contacto {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  rol       String?
+  telefono  String?
+  email     String?
+  whatsapp  String?
+  empresaId Int
+  empresa   Empresa  @relation(fields: [empresaId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([empresaId])
+}
+
+model CupoProveedor {
+  id             Int      @id @default(autoincrement())
+  empresaId      Int
+  empresa        Empresa  @relation(fields: [empresaId], references: [id])
+  anio           Int
+  mes            Int
+  fecha          Int
+  importe        Decimal  @db.Decimal(20, 2)
+  cupoRestante   Decimal  @db.Decimal(20, 2)
+  cupoPendiente  Decimal  @db.Decimal(20, 2)
+  cupoEnviado    Decimal  @db.Decimal(20, 2)
+  observaciones  String?
+  contacto       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([empresaId, anio, mes, fecha])
+  @@index([empresaId])
+}
+
+model PedidoCliente {
+  id              Int      @id @default(autoincrement())
+  empresaId       Int
+  empresa         Empresa  @relation(fields: [empresaId], references: [id])
+  anio            Int
+  mes             Int
+  fecha           Int
+  importe         Decimal  @db.Decimal(20, 2)
+  pedidoRestante  Decimal  @db.Decimal(20, 2)
+  observaciones   String?
+  contacto        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([empresaId, anio, mes, fecha])
+  @@index([empresaId])
+}
+
+model Operacion {
+  id                 Int       @id @default(autoincrement())
+  anio               Int
+  mes                Int
+  clienteId          Int
+  cliente            Empresa   @relation("OperacionCliente", fields: [clienteId], references: [id])
+  proveedorId        Int
+  proveedor          Empresa   @relation("OperacionProveedor", fields: [proveedorId], references: [id])
+  importe            Decimal   @db.Decimal(20, 2)
+  status             String
+  fecha              DateTime
+  comentario         String?
+  clienteEnviado     String?
+  proveedorRecibido  String?
+  fechaArmado        DateTime?
+  clienteContacto    String?
+  proveedorContacto  String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([clienteId])
+  @@index([proveedorId])
+}
+
+model MatrizCupo {
+  id          Int      @id @default(autoincrement())
+  clienteId   Int
+  cliente     Empresa  @relation("MatrizCliente", fields: [clienteId], references: [id])
+  proveedorId Int
+  proveedor   Empresa  @relation("MatrizProveedor", fields: [proveedorId], references: [id])
+  anio        Int
+  mes         Int
+  tasa        Decimal? @db.Decimal(20, 2)
+  monto       Decimal? @db.Decimal(20, 2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([clienteId, proveedorId, anio, mes])
+  @@index([clienteId])
+  @@index([proveedorId])
+}
+
+model EstadoMensual {
+  id           Int      @id @default(autoincrement())
+  empresaId    Int
+  empresa      Empresa  @relation(fields: [empresaId], references: [id])
+  anio         Int
+  mes          Int
+  tipo         String
+  estado       String
+  pedidoTotal  Decimal? @db.Decimal(20, 2)
+  cupoTotal    Decimal? @db.Decimal(20, 2)
+  cupoRestante Decimal? @db.Decimal(20, 2)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([empresaId, anio, mes, tipo])
+  @@index([empresaId])
+}
+
+model Documento {
+  id        Int      @id @default(autoincrement())
+  empresaId Int
+  empresa   Empresa  @relation(fields: [empresaId], references: [id])
+  tipo      String   // CONTRATO, CONSTANCIA_AFIP, FACTURA, PODER, ESTATUTO, OTRO
+  nombre    String
+  path      String
+  size      Int?
+  mime      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([empresaId])
+}
+
+model Nota {
+  id        Int      @id @default(autoincrement())
+  empresaId Int
+  empresa   Empresa  @relation(fields: [empresaId], references: [id])
+  tipo      String   // LLAMADA, EMAIL, REUNION, WHATSAPP, SEGUIMIENTO, INTERNO
+  texto     String
+  usuario   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([empresaId])
+  @@index([createdAt])
+}
+
+model DatoBancario {
+  id        Int      @id @default(autoincrement())
+  empresaId Int
+  empresa   Empresa  @relation(fields: [empresaId], references: [id])
+  banco     String
+  cbu       String
+  alias     String?
+  titular   String?
+  tipo      String?  // CUENTA_CORRIENTE, CAJA_AHORRO
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([empresaId])
+}
+
+model Etiqueta {
+  id        Int               @id @default(autoincrement())
+  nombre    String            @unique
+  color     String            @default("#3b82f6")
+  empresas  EtiquetaEmpresa[]
+  createdAt DateTime          @default(now())
+}
+
+model EtiquetaEmpresa {
+  id         Int      @id @default(autoincrement())
+  empresaId  Int
+  empresa    Empresa  @relation(fields: [empresaId], references: [id])
+  etiquetaId Int
+  etiqueta   Etiqueta @relation(fields: [etiquetaId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@unique([empresaId, etiquetaId])
+  @@index([empresaId])
+  @@index([etiquetaId])
+}

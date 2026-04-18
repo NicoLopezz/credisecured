@@ -1,26 +1,131 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --sidebar-bg: #ffffff;
+  --sidebar-hover: #f1f5f9;
+  --sidebar-active: #3b82f6;
+  --card-bg: #ffffff;
+  --card-bg-hover: #f8fafc;
+  --border-color: #e2e8f0;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --muted: #64748b;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #06b6d4;
+}
+
+.dark {
+  --background: #0a0f1e;
+  --foreground: #e2e8f0;
+  --sidebar-bg: #111827;
+  --sidebar-hover: #1f2937;
+  --sidebar-active: #3b82f6;
+  --card-bg: #111827;
+  --card-bg-hover: #161f30;
+  --border-color: #1e293b;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --muted: #64748b;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #06b6d4;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-card-bg: var(--card-bg);
+  --color-card-bg-hover: var(--card-bg-hover);
+  --color-border-color: var(--border-color);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-muted: var(--muted);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--sans), Arial, Helvetica, sans-serif;
+}
+
+/* Add shadow to cards in light mode */
+:root:not(.dark) .bg-card-bg {
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+}
+
+/* Light mode: darken semantic colors for readability on white backgrounds */
+:root:not(.dark) .text-emerald-400 { color: #047857 !important; }
+:root:not(.dark) .text-green-400   { color: #15803d !important; }
+:root:not(.dark) .text-yellow-400  { color: #a16207 !important; }
+:root:not(.dark) .text-amber-400   { color: #b45309 !important; }
+:root:not(.dark) .text-red-400     { color: #dc2626 !important; }
+:root:not(.dark) .text-blue-400    { color: #2563eb !important; }
+:root:not(.dark) .text-cyan-400    { color: #0e7490 !important; }
+:root:not(.dark) .text-purple-400  { color: #7c3aed !important; }
+
+/* Light mode: badge backgrounds need more contrast */
+:root:not(.dark) .bg-blue-500\/20    { background-color: rgb(59 130 246 / 0.12) !important; }
+:root:not(.dark) .bg-blue-500\/10    { background-color: rgb(59 130 246 / 0.1) !important; }
+:root:not(.dark) .bg-green-500\/20   { background-color: rgb(22 163 74 / 0.12) !important; }
+:root:not(.dark) .bg-purple-500\/20  { background-color: rgb(124 58 237 / 0.12) !important; }
+:root:not(.dark) .bg-red-500\/20     { background-color: rgb(220 38 38 / 0.12) !important; }
+:root:not(.dark) .bg-yellow-500\/20  { background-color: rgb(202 138 4 / 0.12) !important; }
+:root:not(.dark) .bg-amber-500\/10   { background-color: rgb(202 138 4 / 0.1) !important; }
+:root:not(.dark) .bg-emerald-500\/10 { background-color: rgb(5 150 105 / 0.1) !important; }
+:root:not(.dark) .bg-emerald-500\/60 { background-color: rgb(5 150 105 / 0.5) !important; }
+:root:not(.dark) .bg-blue-500\/60    { background-color: rgb(37 99 235 / 0.5) !important; }
+
+/* Table row borders - subtle horizontal lines */
+table tbody tr {
+  border-bottom: 1px solid var(--border-color);
+}
+table tbody tr:last-child {
+  border-bottom: none;
+}
+table thead tr {
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Smooth transitions for all interactive elements */
+a, button, [role="button"] {
+  transition: all 200ms ease-out;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+/* Pulse animation for live indicators */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
 }

@@ -36,6 +36,15 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local tooling
+.claude/
+.vscode/
+
+# business data (lives in DB)
+/data/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
