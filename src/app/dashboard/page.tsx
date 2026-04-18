@@ -42,8 +42,8 @@ export default async function DashboardPage() {
       take: 8,
       orderBy: { fecha: "desc" },
       include: {
-        cliente: { select: { razonSocial: true } },
-        proveedor: { select: { razonSocial: true } },
+        cliente: { select: { id: true, razonSocial: true } },
+        proveedor: { select: { id: true, razonSocial: true } },
       },
     }),
     prisma.operacion.aggregate({ _sum: { importe: true } }),
@@ -441,10 +441,20 @@ export default async function DashboardPage() {
                     className="hover:bg-card-bg-hover transition-colors duration-150"
                   >
                     <td className="px-6 py-3.5 text-foreground font-medium">
-                      {op.cliente.razonSocial}
+                      <Link
+                        href={`/empresas/${op.cliente.id}`}
+                        className="hover:text-blue-400 hover:underline transition-colors"
+                      >
+                        {op.cliente.razonSocial}
+                      </Link>
                     </td>
                     <td className="px-6 py-3.5 text-foreground/80">
-                      {op.proveedor.razonSocial}
+                      <Link
+                        href={`/empresas/${op.proveedor.id}`}
+                        className="hover:text-blue-400 hover:underline transition-colors"
+                      >
+                        {op.proveedor.razonSocial}
+                      </Link>
                     </td>
                     <td className="px-6 py-3.5 text-right font-mono text-emerald-400">
                       {formatARS(op.importe)}

@@ -224,3 +224,33 @@ model EtiquetaEmpresa {
   @@index([empresaId])
   @@index([etiquetaId])
 }
+
+model SearchIndex {
+  id          Int      @id @default(autoincrement())
+  entityType  String   // EMPRESA | CONTACTO | BANCO | DOCUMENTO | NOTA | OPERACION
+  entityId    Int
+  empresaId   Int?
+  title       String
+  subtitle    String?
+  body        String?
+  url         String
+  updatedAt   DateTime @default(now())
+
+  @@unique([entityType, entityId])
+  @@index([empresaId])
+  @@index([entityType])
+}
+
+model NumericRef {
+  id         Int      @id @default(autoincrement())
+  entityType String   // EMPRESA | CONTACTO | BANCO | DOCUMENTO | NOTA | OPERACION
+  entityId   Int
+  empresaId  Int?
+  kind       String   // CUIT | CBU | PHONE | DOC_NO | AMOUNT | OTHER
+  digits     String   // normalizado (solo dígitos)
+  raw        String   // versión original con formato
+
+  @@index([entityType, entityId])
+  @@index([kind])
+  @@index([empresaId])
+}

@@ -4,6 +4,8 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import PageTransition from "@/components/PageTransition";
+import CommandPalette from "@/components/CommandPalette";
+import CommandPaletteTrigger from "@/components/CommandPaletteTrigger";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,16 +33,11 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
       suppressHydrationWarning
     >
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light')document.documentElement.classList.remove('dark');else document.documentElement.classList.add('dark')}catch(e){}})()`,
-          }}
-        />
-      </head>
       <body className="min-h-full" suppressHydrationWarning>
         <Sidebar />
-        <div className="fixed top-4 right-4 z-50">
+        <CommandPalette />
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+          <CommandPaletteTrigger />
           <ThemeToggle />
         </div>
         <main className="ml-[80px] min-h-screen p-8">

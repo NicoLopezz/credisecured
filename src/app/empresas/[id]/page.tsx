@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { formatARS, formatCuit } from "@/lib/format";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import EmpresaTabs, { type TabItem } from "@/components/EmpresaTabs";
 
 export default async function EmpresaDetailPage({
   params,
@@ -95,8 +96,8 @@ export default async function EmpresaDetailPage({
           &larr; Volver a Empresas
         </Link>
         <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <h1 className="text-2xl font-bold text-foreground">
               {empresa.razonSocial}
             </h1>
             <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -139,43 +140,16 @@ export default async function EmpresaDetailPage({
         </div>
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <KpiCard
-          label="Ops como Cliente"
-          value={totalOpsCliente.toString()}
-          sub={formatARS(volCliente._sum.importe)}
-        />
-        <KpiCard
-          label="Ops como Proveedor"
-          value={totalOpsProveedor.toString()}
-          sub={formatARS(volProveedor._sum.importe)}
-        />
-        <KpiCard
-          label="Cupos"
-          value={empresa.cuposProveedor.length.toString()}
-          sub={
-            empresa.cuposProveedor.length > 0
-              ? `Ultimo: ${MES[empresa.cuposProveedor[0].mes]} ${empresa.cuposProveedor[0].anio}`
-              : "Sin cupos"
-          }
-        />
-        <KpiCard
-          label="Pedidos"
-          value={empresa.pedidosCliente.length.toString()}
-          sub={
-            empresa.pedidosCliente.length > 0
-              ? `Ultimo: ${MES[empresa.pedidosCliente[0].mes]} ${empresa.pedidosCliente[0].anio}`
-              : "Sin pedidos"
-          }
-        />
-      </div>
+      <EmpresaTabs tabs={buildTabs()} />
+    </div>
+  );
 
-      {/* 3 columnas */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* === COL IZQUIERDA: Datos + Contactos + Bancarios === */}
-        <div className="space-y-6">
-          <Section title="Datos Generales">
+  function buildInformacion() {
+    if (!empresa) return null;
+    return (
+      <div className="space-y-6">
+        <Section title="Datos Generales">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-3">
             <Field label="Comprobante" value={empresa.comprobante} />
             <Field label="Actividad Principal" value={empresa.actividadPrimaria} />
             <Field label="Actividad Secundaria" value={empresa.actividadSecundaria} />
@@ -183,67 +157,70 @@ export default async function EmpresaDetailPage({
             <Field label="Rubro" value={empresa.rubro} />
             <Field label="Vigencia" value={empresa.vigencia} />
             {empresa.url && <Field label="URL" value={empresa.url} />}
+          </div>
 
-            <div className="border-t border-border-color pt-3 mt-3">
-              <p className="text-xs text-muted mb-2 font-medium">Costos</p>
-              <div className="grid grid-cols-3 gap-2 text-sm">
-                <div>
-                  <span className="text-muted text-xs">A: </span>
-                  <span className="text-foreground font-mono">
-                    {empresa.costoA ? `${Number(empresa.costoA) * 100}%` : "—"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-muted text-xs">B: </span>
-                  <span className="text-foreground font-mono">
-                    {empresa.costoB ? `${Number(empresa.costoB) * 100}%` : "—"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-muted text-xs">C: </span>
-                  <span className="text-foreground font-mono">
-                    {empresa.costoC ? `${Number(empresa.costoC) * 100}%` : "—"}
-                  </span>
-                </div>
+          <div className="border-t border-border-color pt-3 mt-4">
+            <p className="text-xs text-muted mb-2 font-medium">Costos</p>
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-4 text-sm">
+              <div>
+                <span className="text-muted text-xs">A: </span>
+                <span className="text-foreground font-mono">
+                  {empresa.costoA ? `${Number(empresa.costoA) * 100}%` : "—"}
+                </span>
               </div>
-              <div className="grid grid-cols-3 gap-2 text-sm mt-2">
-                <div>
-                  <span className="text-muted text-xs">Percep: </span>
-                  <span className="text-foreground">{empresa.percepciones ?? "—"}</span>
-                </div>
-                <div>
-                  <span className="text-muted text-xs">Reten: </span>
-                  <span className="text-foreground">{empresa.retenciones ?? "—"}</span>
-                </div>
-                <div>
-                  <span className="text-muted text-xs">Adic: </span>
-                  <span className="text-foreground font-mono">
-                    {empresa.costoAdicional ? `${Number(empresa.costoAdicional) * 100}%` : "—"}
-                  </span>
-                </div>
+              <div>
+                <span className="text-muted text-xs">B: </span>
+                <span className="text-foreground font-mono">
+                  {empresa.costoB ? `${Number(empresa.costoB) * 100}%` : "—"}
+                </span>
+              </div>
+              <div>
+                <span className="text-muted text-xs">C: </span>
+                <span className="text-foreground font-mono">
+                  {empresa.costoC ? `${Number(empresa.costoC) * 100}%` : "—"}
+                </span>
+              </div>
+              <div>
+                <span className="text-muted text-xs">Percep: </span>
+                <span className="text-foreground">{empresa.percepciones ?? "—"}</span>
+              </div>
+              <div>
+                <span className="text-muted text-xs">Reten: </span>
+                <span className="text-foreground">{empresa.retenciones ?? "—"}</span>
+              </div>
+              <div>
+                <span className="text-muted text-xs">Adic: </span>
+                <span className="text-foreground font-mono">
+                  {empresa.costoAdicional ? `${Number(empresa.costoAdicional) * 100}%` : "—"}
+                </span>
               </div>
             </div>
+          </div>
 
-            {empresa.observaciones && (
-              <div className="border-t border-border-color pt-3 mt-3">
-                <p className="text-xs text-muted mb-1">Observaciones</p>
-                <p className="text-sm text-foreground whitespace-pre-wrap">
-                  {empresa.observaciones}
-                </p>
-              </div>
-            )}
-            {empresa.comentarios && (
-              <div className="border-t border-border-color pt-3 mt-3">
-                <p className="text-xs text-muted mb-1">Comentarios</p>
-                <p className="text-sm text-foreground whitespace-pre-wrap">
-                  {empresa.comentarios}
-                </p>
-              </div>
-            )}
-          </Section>
+          {(empresa.observaciones || empresa.comentarios) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-border-color pt-3 mt-4">
+              {empresa.observaciones && (
+                <div>
+                  <p className="text-xs text-muted mb-1">Observaciones</p>
+                  <p className="text-sm text-foreground whitespace-pre-wrap">
+                    {empresa.observaciones}
+                  </p>
+                </div>
+              )}
+              {empresa.comentarios && (
+                <div>
+                  <p className="text-xs text-muted mb-1">Comentarios</p>
+                  <p className="text-sm text-foreground whitespace-pre-wrap">
+                    {empresa.comentarios}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </Section>
 
-          {/* Contactos */}
-          <Section title="Contactos" count={empresa.contactos.length}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Section title="Contactos" count={empresa.contactos.length} scroll>
             {empresa.contactos.length === 0 ? (
               <p className="text-sm text-muted">Sin contactos registrados</p>
             ) : (
@@ -276,14 +253,15 @@ export default async function EmpresaDetailPage({
                     {!c.telefono && !c.email && !c.whatsapp && (
                       <p className="text-xs text-muted italic">Sin datos de contacto</p>
                     )}
+                    <UpdatedAtFoot date={c.updatedAt} />
                   </div>
                 ))}
               </div>
             )}
+
           </Section>
 
-          {/* Datos Bancarios */}
-          <Section title="Datos Bancarios" count={empresa.datosBancarios.length}>
+          <Section title="Datos Bancarios" count={empresa.datosBancarios.length} scroll>
             {empresa.datosBancarios.length === 0 ? (
               <p className="text-sm text-muted">Sin datos bancarios</p>
             ) : (
@@ -308,18 +286,120 @@ export default async function EmpresaDetailPage({
                         {db.tipo.replace(/_/g, " ")}
                       </p>
                     )}
+                    <UpdatedAtFoot date={db.updatedAt} />
                   </div>
                 ))}
               </div>
             )}
+
           </Section>
         </div>
+      </div>
+    );
+  }
 
-        {/* === COL CENTRAL: Operaciones + Cupos + Pedidos + Matriz === */}
-        <div className="space-y-6">
+  function buildTabs(): TabItem[] {
+    if (!empresa) return [];
+    const resumen = (
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatBlock
+            label="Ops Cliente"
+            value={totalOpsCliente.toString()}
+            sub={formatARS(volCliente._sum.importe)}
+            accent="blue"
+          />
+          <StatBlock
+            label="Ops Proveedor"
+            value={totalOpsProveedor.toString()}
+            sub={formatARS(volProveedor._sum.importe)}
+            accent="purple"
+          />
+          <StatBlock
+            label="Cupos"
+            value={empresa.cuposProveedor.length.toString()}
+            sub={
+              empresa.cuposProveedor.length > 0
+                ? `${MES[empresa.cuposProveedor[0].mes]} ${empresa.cuposProveedor[0].anio}`
+                : "—"
+            }
+            accent="amber"
+          />
+          <StatBlock
+            label="Pedidos"
+            value={empresa.pedidosCliente.length.toString()}
+            sub={
+              empresa.pedidosCliente.length > 0
+                ? `${MES[empresa.pedidosCliente[0].mes]} ${empresa.pedidosCliente[0].anio}`
+                : "—"
+            }
+            accent="emerald"
+          />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+          <SummaryItem label="Volumen total" value={formatARS(
+            Number(volCliente._sum.importe ?? 0) +
+              Number(volProveedor._sum.importe ?? 0)
+          )} />
+          <SummaryItem label="Contactos" value={empresa.contactos.length.toString()} />
+          <SummaryItem label="Documentos" value={empresa.documentos.length.toString()} />
+          <SummaryItem label="Notas" value={empresa.notas.length.toString()} />
+        </div>
+        {empresa.operacionesCliente.length + empresa.operacionesProveedor.length > 0 && (
+          <div>
+            <h3 className="text-xs font-semibold text-muted uppercase tracking-wider mb-3">
+              Últimas operaciones
+            </h3>
+            <div className="space-y-2">
+              {[...empresa.operacionesCliente, ...empresa.operacionesProveedor]
+                .sort((a, b) => b.fecha.getTime() - a.fecha.getTime())
+                .slice(0, 5)
+                .map((op) => {
+                  const isClienteOp = "proveedor" in op;
+                  const contraparte = isClienteOp
+                    ? (op as typeof empresa.operacionesCliente[number]).proveedor
+                    : (op as typeof empresa.operacionesProveedor[number]).cliente;
+                  return (
+                    <div
+                      key={op.id}
+                      className="flex items-center justify-between border border-border-color/60 rounded-lg px-3 py-2"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                          isClienteOp ? "bg-blue-500/20 text-blue-400" : "bg-purple-500/20 text-purple-400"
+                        }`}>
+                          {isClienteOp ? "→ Prov" : "← Cli"}
+                        </span>
+                        <Link
+                          href={`/empresas/${contraparte.id}`}
+                          className="text-sm text-foreground hover:text-blue-400"
+                        >
+                          {contraparte.razonSocial}
+                        </Link>
+                        <span className="text-[10px] text-muted">
+                          {MES[op.mes]} {op.anio}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono text-xs text-green-400">
+                          {formatARS(op.importe)}
+                        </span>
+                        <StatusBadge status={op.status} />
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+
+    const operaciones = (
+      <div className="space-y-6">
           {/* Operaciones como Cliente */}
           {empresa.esCliente && (
-            <Section title="Operaciones como Cliente" count={totalOpsCliente}>
+            <Section title="Operaciones como Cliente" count={totalOpsCliente} scroll>
               {empresa.operacionesCliente.length === 0 ? (
                 <p className="text-sm text-muted">Sin operaciones</p>
               ) : (
@@ -366,7 +446,7 @@ export default async function EmpresaDetailPage({
 
           {/* Operaciones como Proveedor */}
           {empresa.esProveedor && (
-            <Section title="Operaciones como Proveedor" count={totalOpsProveedor}>
+            <Section title="Operaciones como Proveedor" count={totalOpsProveedor} scroll>
               {empresa.operacionesProveedor.length === 0 ? (
                 <p className="text-sm text-muted">Sin operaciones</p>
               ) : (
@@ -411,9 +491,14 @@ export default async function EmpresaDetailPage({
             </Section>
           )}
 
+      </div>
+    );
+
+    const cuposPedidos = (
+      <div className="space-y-6">
           {/* Cupos Proveedor */}
           {empresa.esProveedor && empresa.cuposProveedor.length > 0 && (
-            <Section title="Cupos Proveedor" count={empresa.cuposProveedor.length}>
+            <Section title="Cupos Proveedor" count={empresa.cuposProveedor.length} scroll>
               <table className="w-full text-xs">
                 <thead>
                   <tr className="text-muted border-b border-border-color">
@@ -447,7 +532,7 @@ export default async function EmpresaDetailPage({
 
           {/* Pedidos Cliente */}
           {empresa.esCliente && empresa.pedidosCliente.length > 0 && (
-            <Section title="Pedidos Cliente" count={empresa.pedidosCliente.length}>
+            <Section title="Pedidos Cliente" count={empresa.pedidosCliente.length} scroll>
               <table className="w-full text-xs">
                 <thead>
                   <tr className="text-muted border-b border-border-color">
@@ -475,10 +560,14 @@ export default async function EmpresaDetailPage({
             </Section>
           )}
 
-          {/* Matriz de Cupos */}
+      </div>
+    );
+
+    const matriz = (
+      <div className="space-y-6">
           {(empresa.matrizCliente.length > 0 ||
             empresa.matrizProveedor.length > 0) && (
-            <Section title="Matriz de Cupos">
+            <Section title="Matriz de Cupos" scroll>
               {empresa.matrizCliente.length > 0 && (
                 <>
                   <p className="text-xs text-muted mb-2 font-medium">
@@ -565,12 +654,12 @@ export default async function EmpresaDetailPage({
               )}
             </Section>
           )}
-        </div>
+      </div>
+    );
 
-        {/* === COL DERECHA: Timeline + Documentos === */}
-        <div className="space-y-6">
-          {/* Timeline / Notas */}
-          <Section title="Actividad" count={empresa.notas.length}>
+    const actividad = (
+      <div className="space-y-6">
+          <Section title="Actividad" count={empresa.notas.length} scroll>
             {empresa.notas.length === 0 ? (
               <p className="text-sm text-muted">
                 Sin actividad registrada. Las notas de llamadas, emails y
@@ -613,8 +702,12 @@ export default async function EmpresaDetailPage({
             )}
           </Section>
 
-          {/* Documentos */}
-          <Section title="Documentos" count={empresa.documentos.length}>
+      </div>
+    );
+
+    const documentos = (
+      <div className="space-y-6">
+          <Section title="Documentos" count={empresa.documentos.length} scroll>
             {empresa.documentos.length === 0 ? (
               <p className="text-sm text-muted">
                 Sin documentos adjuntos. Contratos, constancias AFIP, facturas y
@@ -641,8 +734,78 @@ export default async function EmpresaDetailPage({
               </div>
             )}
           </Section>
-        </div>
       </div>
+    );
+
+    const tabs: TabItem[] = [
+      { key: "info", label: "Información", content: buildInformacion() },
+      { key: "resumen", label: "Resumen", content: resumen },
+    ];
+    if (empresa.esCliente || empresa.esProveedor) {
+      tabs.push({
+        key: "operaciones",
+        label: "Operaciones",
+        count: totalOpsCliente + totalOpsProveedor,
+        content: operaciones,
+      });
+    }
+    tabs.push({
+      key: "cupos-pedidos",
+      label: "Cupos y Pedidos",
+      count: empresa.cuposProveedor.length + empresa.pedidosCliente.length,
+      content: cuposPedidos,
+    });
+    if (empresa.matrizCliente.length + empresa.matrizProveedor.length > 0) {
+      tabs.push({
+        key: "matriz",
+        label: "Matriz",
+        count: empresa.matrizCliente.length + empresa.matrizProveedor.length,
+        content: matriz,
+      });
+    }
+    tabs.push({
+      key: "actividad",
+      label: "Actividad",
+      count: empresa.notas.length,
+      content: actividad,
+    });
+    tabs.push({
+      key: "documentos",
+      label: "Documentos",
+      count: empresa.documentos.length,
+      content: documentos,
+    });
+    return tabs;
+  }
+}
+
+function UpdatedAtFoot({ date }: { date: Date }) {
+  const dias = Math.floor(
+    (Date.now() - date.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  const color =
+    dias < 15 ? "text-green-400" : dias < 45 ? "text-amber-400" : "text-red-400";
+  const label = dias === 0 ? "hoy" : `hace ${dias}d`;
+  return (
+    <div className="flex items-center justify-between mt-2 pt-2 border-t border-border-color/40 text-[10px] text-muted">
+      <span>
+        Actualizado{" "}
+        {date.toLocaleDateString("es-AR", {
+          day: "2-digit",
+          month: "short",
+          year: "2-digit",
+        })}
+      </span>
+      <span className={`font-mono ${color}`}>{label}</span>
+    </div>
+  );
+}
+
+function SummaryItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-background/40 border border-border-color/60 rounded-lg px-3 py-2">
+      <p className="text-[10px] text-muted uppercase tracking-wide">{label}</p>
+      <p className="text-sm font-mono text-foreground truncate">{value}</p>
     </div>
   );
 }
@@ -671,10 +834,12 @@ function Section({
   title,
   count,
   children,
+  scroll,
 }: {
   title: string;
   count?: number;
   children: React.ReactNode;
+  scroll?: boolean;
 }) {
   return (
     <div className="bg-card-bg rounded-xl border border-border-color p-5">
@@ -686,7 +851,60 @@ function Section({
           </span>
         )}
       </div>
-      {children}
+      {scroll ? (
+        <div className="max-h-[320px] overflow-y-auto pr-1 -mr-1">
+          {children}
+        </div>
+      ) : (
+        children
+      )}
+    </div>
+  );
+}
+
+function SubTitle({
+  children,
+  count,
+}: {
+  children: React.ReactNode;
+  count?: number;
+}) {
+  return (
+    <div className="flex items-center justify-between border-t border-border-color mt-5 pt-4 mb-3 first:mt-0 first:border-t-0 first:pt-0">
+      <h3 className="text-xs font-semibold text-muted uppercase tracking-wider">
+        {children}
+      </h3>
+      {count !== undefined && (
+        <span className="text-[10px] text-muted bg-background/50 px-2 py-0.5 rounded-full">
+          {count}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function StatBlock({
+  label,
+  value,
+  sub,
+  accent,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  accent: "blue" | "purple" | "amber" | "emerald";
+}) {
+  const accents: Record<string, string> = {
+    blue: "text-blue-400",
+    purple: "text-purple-400",
+    amber: "text-amber-400",
+    emerald: "text-emerald-400",
+  };
+  return (
+    <div className="bg-background/40 rounded-lg border border-border-color/60 p-3">
+      <p className="text-[10px] text-muted uppercase tracking-wide">{label}</p>
+      <p className={`text-xl font-bold ${accents[accent]}`}>{value}</p>
+      <p className="text-[10px] text-muted mt-0.5 font-mono truncate">{sub}</p>
     </div>
   );
 }
